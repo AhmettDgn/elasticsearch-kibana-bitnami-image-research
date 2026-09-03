@@ -5,6 +5,8 @@ Contabo testi sırasında aşağıdakiler kaydedilecektir:
 - K3s ve ECK sürümü.
 - ECK operator readiness.
 - Elasticsearch/Kibana/exporter pod durumu.
+
+`collect-evidence.sh`, endpointleri bağımsız toplar. Bir endpoint 404 veya bağlantı hatası döndürürse daha önce oluşturulan dosyaları korur, kalan endpointleri dener, hatalı endpoint için `*.error.txt` ve `report.md` kaydı üretir; bütün kontroller tamamlandıktan sonra non-zero döner.
 - PVC ve ClusterIP servisleri.
 - Başlangıç süresi ve varsa event/hata analizi.
 

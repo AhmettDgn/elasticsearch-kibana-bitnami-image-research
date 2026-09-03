@@ -29,4 +29,5 @@
 - Metrics scriptindeki servis hostname değişkeni `ES_HOST` olarak standardize edildi; local port aralığı ve kullanım kontrolü ile dolu-port regresyon testi eklendi.
 - Exporter `v1.11.0` image metadata'sı ve katmanındaki passwd/group kayıtları doğrulandı; `nobody` kullanıcısının UID/GID değeri `65534:65534` olarak exporter container securityContext'e configurable biçimde eklendi.
 - Exporter kabul kontrolüne açık `/healthz` isteği eklendi; `/metrics` Elasticsearch metrik doğrulaması korundu.
+- Evidence endpointleri doğrulandı: Elasticsearch `/_cluster/health`, Kibana `/api/status`, exporter `/metrics`; opsiyonel index search 404 dahil endpoint hataları isim/path/HTTP koduyla raporlanıp kalan kanıtların toplanmasına devam ediliyor.
 - Paylaşılan özet sonuçlar test raporuna işlendi; sanitize edilmiş ham komut çıktıları ve screenshot'lar daha sonra `artifacts/` ile `screenshots/` dizinlerine eklenebilir.
