@@ -15,4 +15,7 @@
 - Resmi Helm `v3.18.6` paketi yayınlanan SHA-256 checksum ile doğrulandı ve geçici dizinden kullanıldı.
 - Aktif chart `helm lint` ve `helm template` testlerini geçti; aktif render'da Bitnami runtime pattern'i bulunmadı.
 - Legacy image override render'ında 15 Bitnami runtime path eşleşmesi bulunarak yalnız override yaklaşımının yetersizliği doğrulandı.
+- Public GitHub repository oluşturuldu, `origin` bağlandı ve `main` push edildi.
+- GitHub Actions Helm/render/schema kontrolleri ile Gitleaks secret taraması başarılı oldu.
+- GitHub Actions bağımlılıkları güncel resmi sürümlerin immutable commit SHA'larına sabitlendi.
 - Gerçek Contabo sonuçları kullanıcı testinden sonra `artifacts/` ve test raporlarına eklenecektir.
