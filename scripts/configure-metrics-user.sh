@@ -6,7 +6,7 @@ STACK_NAME="${STACK_NAME:-elastic-stack}"
 EXPORTER_USER="${EXPORTER_USER:-elasticsearch_exporter}"
 EXPORTER_SECRET="${EXPORTER_SECRET:-elasticsearch-exporter-credentials}"
 LOCAL_PORT="${LOCAL_PORT:-19200}"
-ES_SERVICE_DNS="${ES_SERVICE_DNS:-${STACK_NAME}-es-http.${NAMESPACE}.svc}"
+ES_HOST="${ES_HOST:-${STACK_NAME}-es-http.${NAMESPACE}.svc}"
 API_RETRY_ATTEMPTS="${API_RETRY_ATTEMPTS:-30}"
 RETRY_INTERVAL_SECONDS="${RETRY_INTERVAL_SECONDS:-2}"
 CURL_CONNECT_TIMEOUT_SECONDS="${CURL_CONNECT_TIMEOUT_SECONDS:-3}"
@@ -15,9 +15,15 @@ CURL_MAX_TIME_SECONDS="${CURL_MAX_TIME_SECONDS:-10}"
 log() { printf '[metrics-user] %s\n' "$*"; }
 fail() { printf '[metrics-user] ERROR: %s\n' "$*" >&2; exit 1; }
 
-for command in kubectl curl openssl base64; do
+for command in kubectl curl openssl base64 ss; do
   command -v "$command" >/dev/null 2>&1 || fail "Missing command: ${command}"
 done
+
+[[ "${LOCAL_PORT}" =~ ^[0-9]+$ ]] || fail "LOCAL_PORT must be a numeric TCP port: ${LOCAL_PORT}"
+(( LOCAL_PORT >= 1 && LOCAL_PORT <= 65535 )) || fail "LOCAL_PORT must be between 1 and 65535: ${LOCAL_PORT}"
+if ss -H -ltn "sport = :${LOCAL_PORT}" | grep -q .; then
+  fail "LOCAL_PORT ${LOCAL_PORT} is already in use on 127.0.0.1; stop the listener or choose another port, for example LOCAL_PORT=19443"
+fi
 
 tmp_dir="$(mktemp -d)"
 port_forward_pid=""
@@ -46,15 +52,15 @@ kubectl -n "${NAMESPACE}" get secret "${STACK_NAME}-es-http-certs-public" -o jso
 kubectl -n "${NAMESPACE}" port-forward "service/${STACK_NAME}-es-http" "${LOCAL_PORT}:9200" --address 127.0.0.1 >"${tmp_dir}/port-forward.log" 2>&1 &
 port_forward_pid=$!
 
-es_base_url="https://${ES_SERVICE_DNS}:${LOCAL_PORT}"
-es_resolve="${ES_SERVICE_DNS}:${LOCAL_PORT}:127.0.0.1"
+es_base_url="https://${ES_HOST}:${LOCAL_PORT}"
+es_resolve="${ES_HOST}:${LOCAL_PORT}:127.0.0.1"
 curl_common_args=(
   --silent
   --show-error
   --fail
   --cacert "${tmp_dir}/ca.crt"
   --resolve "${es_resolve}"
-  --noproxy "${ES_SERVICE_DNS}"
+  --noproxy "${ES_HOST}"
   --connect-timeout "${CURL_CONNECT_TIMEOUT_SECONDS}"
   --max-time "${CURL_MAX_TIME_SECONDS}"
   --user "elastic:${elastic_password}"
@@ -90,7 +96,7 @@ log "Creating least-privilege exporter role"
 curl --silent --show-error --fail \
   --cacert "${tmp_dir}/ca.crt" \
   --resolve "${es_resolve}" \
-  --noproxy "${ES_SERVICE_DNS}" \
+  --noproxy "${ES_HOST}" \
   --connect-timeout "${CURL_CONNECT_TIMEOUT_SECONDS}" \
   --max-time "${CURL_MAX_TIME_SECONDS}" \
   --user "elastic:${elastic_password}" \
@@ -103,7 +109,7 @@ log "Creating exporter user"
 curl --silent --show-error --fail \
   --cacert "${tmp_dir}/ca.crt" \
   --resolve "${es_resolve}" \
-  --noproxy "${ES_SERVICE_DNS}" \
+  --noproxy "${ES_HOST}" \
   --connect-timeout "${CURL_CONNECT_TIMEOUT_SECONDS}" \
   --max-time "${CURL_MAX_TIME_SECONDS}" \
   --user "elastic:${elastic_password}" \

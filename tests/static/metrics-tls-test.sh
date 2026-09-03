@@ -68,7 +68,14 @@ cat > "${MOCK_BIN}/openssl" <<'EOF'
 printf '0123456789abcdef0123456789abcdef01234567\n'
 EOF
 
-chmod +x "${MOCK_BIN}/kubectl" "${MOCK_BIN}/curl" "${MOCK_BIN}/openssl"
+cat > "${MOCK_BIN}/ss" <<'EOF'
+#!/usr/bin/env bash
+if [[ "${MOCK_PORT_IN_USE:-false}" == "true" ]]; then
+  printf 'LISTEN 0 4096 127.0.0.1:19445 0.0.0.0:*\n'
+fi
+EOF
+
+chmod +x "${MOCK_BIN}/kubectl" "${MOCK_BIN}/curl" "${MOCK_BIN}/openssl" "${MOCK_BIN}/ss"
 export MOCK_STATE_DIR
 
 success_output="$(
@@ -106,5 +113,23 @@ set -e
 [[ "${timeout_exit}" -ne 0 ]]
 grep -q '\[port-forward\] mock port-forward is running' <<<"${timeout_output}"
 grep -q '\[curl\] curl: (60) mock TLS failure' <<<"${timeout_output}"
+
+: > "${MOCK_STATE_DIR}/kubectl-calls.log"
+set +e
+port_in_use_output="$(
+  PATH="${MOCK_BIN}:/usr/bin:/bin" \
+  MOCK_PORT_IN_USE=true \
+  LOCAL_PORT=19445 \
+  "${ROOT_DIR}/scripts/configure-metrics-user.sh" 2>&1
+)"
+port_in_use_exit=$?
+set -e
+
+[[ "${port_in_use_exit}" -ne 0 ]]
+grep -q 'LOCAL_PORT 19445 is already in use' <<<"${port_in_use_output}"
+if grep -q 'port-forward' "${MOCK_STATE_DIR}/kubectl-calls.log"; then
+  echo 'Port-forward was started despite the occupied local port' >&2
+  exit 1
+fi
 
 echo 'Metrics TLS/SAN regression tests passed'
