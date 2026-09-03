@@ -10,6 +10,17 @@ Contabo testi sırasında aşağıdakiler kaydedilecektir:
 
 Secret ve credential değerleri rapora eklenmeyecektir.
 
+## Gerçek Contabo sonucu
+
+Düzeltme talebinden sonra mevcut Helm/ECK deployment başarıyla reconcile olmuştur:
+
+| Kaynak | Health | Node/Pod | Sürüm | Phase |
+|---|---|---:|---:|---|
+| Elasticsearch | `green` | 1 node | `8.19.21` | `Ready` |
+| Kibana | `green` | 1 node, pod `1/1 Running` | `8.19.21` | — |
+
+Bu sonuç, Helm chart ve ECK resource creation akışının doğru olduğunu; hatanın yalnız eski `deploy.sh` readiness kontrolünün CR/pod oluşumundan önce veya uygun selector bulunmadan fail etmesinden kaynaklandığını doğrular. Bu nedenle Helm install/upgrade, ECK CR ve workload tanımları değiştirilmemiştir.
+
 ## Readiness davranışı
 
 - Helm install sonrasında Elasticsearch ve Kibana CR'ları ayrı ayrı poll edilir.

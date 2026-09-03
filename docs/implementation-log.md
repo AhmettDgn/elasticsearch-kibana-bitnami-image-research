@@ -21,4 +21,6 @@
 - Contabo bootstrap gözlemine göre deploy readiness akışı düzeltildi: CR oluşumu, ECK health geçişleri, pod keşfi ve pod Ready kontrolleri birbirinden ayrıldı.
 - Elasticsearch `unknown` ve Kibana `red` başlangıç durumları retry edilir; timeout/hata halinde otomatik diagnostics eklenir.
 - Readiness state geçişleri ve diagnostics komutları için mock tabanlı regression testi eklendi.
-- Gerçek Contabo sonuçları kullanıcı testinden sonra `artifacts/` ve test raporlarına eklenecektir.
+- Gerçek Contabo deployment'ında Elasticsearch `green`, 1 node, `8.19.21`, `Ready`; Kibana `green`, 1 node ve pod `1/1 Running` olarak doğrulandı.
+- Başarılı sonuç nedeniyle Helm/ECK resource creation davranışı korunarak değişiklik yalnız readiness/wait ve hata diagnostics katmanıyla sınırlandı.
+- Paylaşılan özet sonuçlar test raporuna işlendi; sanitize edilmiş ham komut çıktıları ve screenshot'lar daha sonra `artifacts/` ile `screenshots/` dizinlerine eklenebilir.
