@@ -3,7 +3,8 @@ set -Eeuo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 RENDERED="$(mktemp)"
-trap 'rm -f "${RENDERED}"' EXIT
+SECURITY_RENDERED="$(mktemp)"
+trap 'rm -f "${RENDERED}" "${SECURITY_RENDERED}"' EXIT
 
 helm lint "${ROOT_DIR}/charts/elastic-stack" -f "${ROOT_DIR}/helm-values/non-bitnami-values.yaml"
 helm template elastic-stack "${ROOT_DIR}/charts/elastic-stack" \
@@ -18,6 +19,17 @@ fi
 grep -q 'kind: Elasticsearch' "${RENDERED}"
 grep -q 'kind: Kibana' "${RENDERED}"
 grep -q 'ghcr.io/prometheus-community/elasticsearch-exporter:v1.11.0' "${RENDERED}"
+grep -q 'runAsUser: 65534' "${RENDERED}"
+grep -q 'runAsGroup: 65534' "${RENDERED}"
+grep -q 'path: /healthz' "${RENDERED}"
+
+helm template elastic-stack "${ROOT_DIR}/charts/elastic-stack" \
+  --namespace elastic-stack \
+  -f "${ROOT_DIR}/helm-values/non-bitnami-values.yaml" \
+  --set exporter.containerSecurityContext.runAsUser=12345 \
+  --set exporter.containerSecurityContext.runAsGroup=12345 > "${SECURITY_RENDERED}"
+grep -q 'runAsUser: 12345' "${SECURITY_RENDERED}"
+grep -q 'runAsGroup: 12345' "${SECURITY_RENDERED}"
 
 "${ROOT_DIR}/tests/static/deploy-readiness-test.sh"
 "${ROOT_DIR}/tests/static/metrics-tls-test.sh"

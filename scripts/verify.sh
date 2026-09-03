@@ -84,6 +84,9 @@ grep -q '"status":"green"' <<<"${health}" || fail "Cluster health is not green: 
 log "Checking Kibana status"
 curl "${kb_curl_args[@]}" "${kb_base_url}/api/status" | grep -q 'available' || fail "Kibana is not available"
 
+log "Checking exporter health endpoint"
+curl --silent --show-error --fail "http://127.0.0.1:${EXPORTER_PORT}/healthz" >/dev/null || fail "Exporter health endpoint failed"
+
 log "Checking exporter metrics"
 curl --silent --show-error --fail "http://127.0.0.1:${EXPORTER_PORT}/metrics" | grep -q '^elasticsearch_' || fail "Exporter did not return Elasticsearch metrics"
 

@@ -27,4 +27,6 @@
 - Metrics kullanıcı scriptine port-forward process kontrolü, görünür curl retry hatası ve cleanup öncesi timeout log dökümü eklendi.
 - TLS/SAN, retry ve timeout davranışı için mock tabanlı regression testi eklendi.
 - Metrics scriptindeki servis hostname değişkeni `ES_HOST` olarak standardize edildi; local port aralığı ve kullanım kontrolü ile dolu-port regresyon testi eklendi.
+- Exporter `v1.11.0` image metadata'sı ve katmanındaki passwd/group kayıtları doğrulandı; `nobody` kullanıcısının UID/GID değeri `65534:65534` olarak exporter container securityContext'e configurable biçimde eklendi.
+- Exporter kabul kontrolüne açık `/healthz` isteği eklendi; `/metrics` Elasticsearch metrik doğrulaması korundu.
 - Paylaşılan özet sonuçlar test raporuna işlendi; sanitize edilmiş ham komut çıktıları ve screenshot'lar daha sonra `artifacts/` ile `screenshots/` dizinlerine eklenebilir.

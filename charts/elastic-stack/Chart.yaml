@@ -2,7 +2,7 @@ apiVersion: v2
 name: elastic-stack
 description: Bitnami-free Elasticsearch and Kibana deployment managed by ECK
 type: application
-version: 0.1.0
+version: 0.1.1
 appVersion: "8.19.21"
 kubeVersion: ">=1.31.0-0"
 home: https://github.com/AhmettDgn/elasticsearch-kibana-bitnami-image-research
