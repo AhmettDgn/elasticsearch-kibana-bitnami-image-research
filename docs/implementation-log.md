@@ -32,4 +32,5 @@
 - Evidence endpointleri doğrulandı: Elasticsearch `/_cluster/health`, Kibana `/api/status`, exporter `/metrics`; opsiyonel index search 404 dahil endpoint hataları isim/path/HTTP koduyla raporlanıp kalan kanıtların toplanmasına devam ediliyor.
 - Verify ve evidence scriptlerinin ortak varsayılan index adı `demo-index` yapıldı; evidence search öncesi `HEAD /demo-index` kontrolüyle eksik index genel 404 yerine açık önkoşul hatası olarak raporlanıyor.
 - Verify exporter metrics kontrolü curl çıktısını önce geçici dosyaya alacak şekilde ayrıştırıldı; pipeline/SIGPIPE kaynaklı curl `23` yanlış negatifi kaldırıldı ve API başlangıç probe hataları retry süresince info seviyesine çekildi.
+- Resilience pod recreation akışı yeni pod'u selector ve değişen UID ile poll ediyor; pod oluşmadan `kubectl wait` çalıştırmıyor, ardından pod Ready, ECK `Ready/green`, API erişimi ve restart öncesi/sonrası `found=true` persistence kontrollerini uyguluyor.
 - Paylaşılan özet sonuçlar test raporuna işlendi; sanitize edilmiş ham komut çıktıları ve screenshot'lar daha sonra `artifacts/` ile `screenshots/` dizinlerine eklenebilir.
