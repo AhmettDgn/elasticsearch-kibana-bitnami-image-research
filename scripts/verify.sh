@@ -7,6 +7,8 @@ INDEX_NAME="${INDEX_NAME:-demo-index}"
 ES_PORT="${ES_PORT:-19200}"
 KB_PORT="${KB_PORT:-15601}"
 EXPORTER_PORT="${EXPORTER_PORT:-19114}"
+ES_API_RETRY_ATTEMPTS="${ES_API_RETRY_ATTEMPTS:-60}"
+ES_API_RETRY_INTERVAL_SECONDS="${ES_API_RETRY_INTERVAL_SECONDS:-2}"
 ES_SERVICE_DNS="${ES_SERVICE_DNS:-${STACK_NAME}-es-http.${NAMESPACE}.svc}"
 KB_SERVICE_DNS="${KB_SERVICE_DNS:-${STACK_NAME}-kb-http.${NAMESPACE}.svc}"
 
@@ -41,14 +43,19 @@ es_curl_args=(--silent --show-error --fail --cacert "${tmp_dir}/es-ca.crt" --res
 kb_curl_args=(--silent --show-error --fail --cacert "${tmp_dir}/kb-ca.crt" --resolve "${kb_resolve}" --noproxy "${KB_SERVICE_DNS}" --user "elastic:${elastic_password}")
 
 es_ready=false
-for _ in $(seq 1 60); do
-  if curl "${es_curl_args[@]}" "${es_base_url}/" >/dev/null; then
+es_probe_error="${tmp_dir}/es-probe-error.log"
+for attempt in $(seq 1 "${ES_API_RETRY_ATTEMPTS}"); do
+  if curl "${es_curl_args[@]}" "${es_base_url}/" >/dev/null 2>"${es_probe_error}"; then
     es_ready=true
     break
   fi
-  sleep 2
+  log "Elasticsearch API is not reachable yet (attempt ${attempt}/${ES_API_RETRY_ATTEMPTS}); retrying"
+  sleep "${ES_API_RETRY_INTERVAL_SECONDS}"
 done
-[[ "${es_ready}" == "true" ]] || fail "Elasticsearch API did not become reachable"
+if [[ "${es_ready}" != "true" ]]; then
+  [[ ! -s "${es_probe_error}" ]] || sed 's/^/[curl] /' "${es_probe_error}" >&2
+  fail "Elasticsearch API did not become reachable after ${ES_API_RETRY_ATTEMPTS} attempts"
+fi
 
 log "Creating single-node test index with zero replicas"
 index_status="$(curl --silent --show-error \
@@ -88,7 +95,17 @@ log "Checking exporter health endpoint"
 curl --silent --show-error --fail "http://127.0.0.1:${EXPORTER_PORT}/healthz" >/dev/null || fail "Exporter health endpoint failed"
 
 log "Checking exporter metrics"
-curl --silent --show-error --fail "http://127.0.0.1:${EXPORTER_PORT}/metrics" | grep -q '^elasticsearch_' || fail "Exporter did not return Elasticsearch metrics"
+exporter_metrics_file="${tmp_dir}/exporter-metrics.txt"
+exporter_metrics_error="${tmp_dir}/exporter-metrics-error.log"
+if ! curl --silent --show-error --fail \
+  "http://127.0.0.1:${EXPORTER_PORT}/metrics" \
+  --output "${exporter_metrics_file}" 2>"${exporter_metrics_error}"; then
+  [[ ! -s "${exporter_metrics_error}" ]] || sed 's/^/[curl] /' "${exporter_metrics_error}" >&2
+  fail "Exporter /metrics endpoint is not reachable at http://127.0.0.1:${EXPORTER_PORT}/metrics"
+fi
+if ! grep -q '^elasticsearch_' "${exporter_metrics_file}"; then
+  fail "Exporter /metrics endpoint is reachable but returned no elasticsearch_* metrics"
+fi
 
 unset elastic_password search_result health es_curl_args kb_curl_args
 log "All integration checks passed"

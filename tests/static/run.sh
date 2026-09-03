@@ -34,6 +34,7 @@ grep -q 'runAsGroup: 12345' "${SECURITY_RENDERED}"
 "${ROOT_DIR}/tests/static/deploy-readiness-test.sh"
 "${ROOT_DIR}/tests/static/metrics-tls-test.sh"
 "${ROOT_DIR}/tests/static/collect-evidence-test.sh"
+"${ROOT_DIR}/tests/static/verify-metrics-test.sh"
 
 if command -v kubeconform >/dev/null 2>&1; then
   kubeconform -strict -summary -ignore-missing-schemas "${RENDERED}"

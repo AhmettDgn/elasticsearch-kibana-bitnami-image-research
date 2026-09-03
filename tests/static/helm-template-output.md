@@ -28,6 +28,7 @@ Kontroller:
 - Exporter render'ında doğrulanmış numeric `runAsUser: 65534` ve `runAsGroup: 65534`; `runAsNonRoot`, `RuntimeDefault`, read-only root filesystem ve capability drop ile birlikte üretildi.
 - Evidence regresyon testi; Elasticsearch/Kibana SAN hostname ve `--resolve`, doğru health/status/metrics endpointleri, search 404 sonrası partial-output ve credential sızıntısı olmamasını doğruladı.
 - Ortak `demo-index` varsayılanı için HEAD preflight; index yokken açık hata/search skip ve index varken başarılı search evidence senaryoları doğrulandı.
+- Verify metrics regresyonu; curl yanıtının dosyaya yazılması, ayrı grep kontrolü, curl `23` yanlış negatif koruması ve geçici API probe hatasının info seviyesinde kalmasını doğruladı.
 - Metrics TLS/SAN regression testi; ECK public CA kullanımı, servis DNS hostname'i, configurable local port, `--resolve`, proxy bypass, retry hatası ve timeout diagnostics senaryolarını geçti.
 - Kubeconform CI sonucu: 4 kaynak; standart Kubernetes kaynaklarında 2 valid, ECK CR'larında 2 schema olmadığı için skipped, 0 invalid ve 0 error.
 - Gitleaks CI sonucu: secret leak bulunmadı.
