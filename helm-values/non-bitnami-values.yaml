@@ -1,0 +1,42 @@
+stack:
+  version: "8.19.21"
+
+fullnameOverride: elastic-stack
+
+elasticsearch:
+  nodeCount: 1
+  javaOpts: "-Xms1536m -Xmx1536m"
+  resources:
+    requests:
+      cpu: "1000m"
+      memory: "2Gi"
+    limits:
+      cpu: "2500m"
+      memory: "3Gi"
+  persistence:
+    storageClass: local-path
+    size: 20Gi
+
+kibana:
+  count: 1
+  resources:
+    requests:
+      cpu: "250m"
+      memory: "512Mi"
+    limits:
+      cpu: "1000m"
+      memory: "1Gi"
+
+exporter:
+  enabled: true
+  existingSecret: elasticsearch-exporter-credentials
+  resources:
+    requests:
+      cpu: "50m"
+      memory: "64Mi"
+    limits:
+      cpu: "200m"
+      memory: "128Mi"
+
+serviceMonitor:
+  enabled: false

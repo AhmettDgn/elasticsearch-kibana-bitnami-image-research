@@ -1,0 +1,25 @@
+apiVersion: kibana.k8s.elastic.co/v1
+kind: Kibana
+metadata:
+  name: {{ include "elastic-stack.fullname" . }}
+  labels:
+    {{- include "elastic-stack.labels" . | nindent 4 }}
+spec:
+  version: {{ required "stack.version is required" .Values.stack.version | quote }}
+  count: {{ .Values.kibana.count }}
+  elasticsearchRef:
+    name: {{ include "elastic-stack.fullname" . }}
+  http:
+    service:
+      spec:
+        type: ClusterIP
+  podTemplate:
+    spec:
+      securityContext:
+        {{- toYaml .Values.kibana.podSecurityContext | nindent 8 }}
+      containers:
+        - name: kibana
+          resources:
+            {{- toYaml .Values.kibana.resources | nindent 12 }}
+          securityContext:
+            {{- toYaml .Values.kibana.containerSecurityContext | nindent 12 }}

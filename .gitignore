@@ -1,0 +1,17 @@
+# Generated evidence and rendered manifests
+artifacts/*
+!artifacts/.gitkeep
+!artifacts/README.md
+rendered*.yaml
+
+# Local credentials and editor files
+.env
+*.local
+*.key
+*.pem
+.idea/
+.vscode/
+
+# Helm build output
+*.tgz
+charts/elastic-stack/charts/

@@ -1,0 +1,92 @@
+{{- if .Values.exporter.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "elastic-stack.fullname" . }}-exporter
+  labels:
+    {{- include "elastic-stack.labels" . | nindent 4 }}
+    app.kubernetes.io/component: exporter
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "elastic-stack.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/component: exporter
+  template:
+    metadata:
+      labels:
+        {{- include "elastic-stack.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/component: exporter
+    spec:
+      automountServiceAccountToken: false
+      securityContext:
+        {{- toYaml .Values.exporter.podSecurityContext | nindent 8 }}
+      containers:
+        - name: exporter
+          image: "{{ .Values.exporter.image.repository }}:{{ .Values.exporter.image.tag }}"
+          imagePullPolicy: {{ .Values.exporter.image.pullPolicy }}
+          args:
+            - --es.uri=https://{{ include "elastic-stack.fullname" . }}-es-http:9200
+            - --es.ca=/etc/exporter/certs/ca.crt
+            - --es.all
+            - --es.indices
+            - --es.timeout=30s
+            - --web.listen-address=:{{ .Values.exporter.service.port }}
+          env:
+            - name: ES_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: {{ required "exporter.existingSecret is required" .Values.exporter.existingSecret }}
+                  key: username
+            - name: ES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: {{ required "exporter.existingSecret is required" .Values.exporter.existingSecret }}
+                  key: password
+          ports:
+            - name: metrics
+              containerPort: {{ .Values.exporter.service.port }}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /healthz
+              port: metrics
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /healthz
+              port: metrics
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            {{- toYaml .Values.exporter.resources | nindent 12 }}
+          securityContext:
+            {{- toYaml .Values.exporter.containerSecurityContext | nindent 12 }}
+          volumeMounts:
+            - name: es-http-ca
+              mountPath: /etc/exporter/certs
+              readOnly: true
+      volumes:
+        - name: es-http-ca
+          secret:
+            secretName: {{ include "elastic-stack.fullname" . }}-es-http-certs-public
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "elastic-stack.fullname" . }}-exporter
+  labels:
+    {{- include "elastic-stack.labels" . | nindent 4 }}
+    app.kubernetes.io/component: exporter
+spec:
+  type: ClusterIP
+  selector:
+    {{- include "elastic-stack.selectorLabels" . | nindent 4 }}
+    app.kubernetes.io/component: exporter
+  ports:
+    - name: metrics
+      port: {{ .Values.exporter.service.port }}
+      targetPort: metrics
+      protocol: TCP
+{{- end }}

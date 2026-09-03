@@ -1,0 +1,45 @@
+apiVersion: elasticsearch.k8s.elastic.co/v1
+kind: Elasticsearch
+metadata:
+  name: {{ include "elastic-stack.fullname" . }}
+  labels:
+    {{- include "elastic-stack.labels" . | nindent 4 }}
+spec:
+  version: {{ required "stack.version is required" .Values.stack.version | quote }}
+  http:
+    service:
+      spec:
+        type: ClusterIP
+  nodeSets:
+    - name: default
+      count: {{ .Values.elasticsearch.nodeCount }}
+      config:
+        node.roles:
+          - master
+          - data
+          - ingest
+          - remote_cluster_client
+          - transform
+      podTemplate:
+        spec:
+          securityContext:
+            {{- toYaml .Values.elasticsearch.podSecurityContext | nindent 12 }}
+          containers:
+            - name: elasticsearch
+              env:
+                - name: ES_JAVA_OPTS
+                  value: {{ .Values.elasticsearch.javaOpts | quote }}
+              resources:
+                {{- toYaml .Values.elasticsearch.resources | nindent 16 }}
+              securityContext:
+                {{- toYaml .Values.elasticsearch.containerSecurityContext | nindent 16 }}
+      volumeClaimTemplates:
+        - metadata:
+            name: elasticsearch-data
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            storageClassName: {{ .Values.elasticsearch.persistence.storageClass | quote }}
+            resources:
+              requests:
+                storage: {{ .Values.elasticsearch.persistence.size | quote }}

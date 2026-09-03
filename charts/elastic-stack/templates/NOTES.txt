@@ -1,0 +1,10 @@
+Elastic Stack resources were submitted to ECK.
+
+Check status:
+  kubectl get elasticsearch,kibana,pods,pvc,svc -n {{ .Release.Namespace }}
+
+Kibana port-forward:
+  kubectl -n {{ .Release.Namespace }} port-forward service/{{ include "elastic-stack.fullname" . }}-kb-http 5601:5601 --address 127.0.0.1
+
+Elasticsearch port-forward:
+  kubectl -n {{ .Release.Namespace }} port-forward service/{{ include "elastic-stack.fullname" . }}-es-http 9200:9200 --address 127.0.0.1

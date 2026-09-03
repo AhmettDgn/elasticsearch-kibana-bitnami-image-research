@@ -1,0 +1,7 @@
+.git/
+.github/
+artifacts/
+screenshots/
+legacy-chart/
+docs/
+tests/

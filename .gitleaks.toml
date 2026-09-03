@@ -1,0 +1,8 @@
+title = "Repository gitleaks configuration"
+
+[allowlist]
+description = "Archived third-party chart is immutable analysis input"
+paths = [
+  '''^legacy-chart/''',
+  '''^helm-values/original-values-oci-loyalty\.yaml$'''
+]

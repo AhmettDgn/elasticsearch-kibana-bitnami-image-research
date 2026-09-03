@@ -1,0 +1,23 @@
+# Analysis-only override for the archived Bitnami chart. Do not deploy.
+image:
+  registry: docker.elastic.co
+  repository: elasticsearch/elasticsearch
+  tag: 8.19.21
+
+kibana:
+  image:
+    registry: docker.elastic.co
+    repository: kibana/kibana
+    tag: 8.19.21
+
+curator:
+  enabled: false
+
+metrics:
+  enabled: false
+
+volumePermissions:
+  enabled: false
+
+sysctlImage:
+  enabled: false
