@@ -18,4 +18,7 @@
 - Public GitHub repository oluşturuldu, `origin` bağlandı ve `main` push edildi.
 - GitHub Actions Helm/render/schema kontrolleri ile Gitleaks secret taraması başarılı oldu.
 - GitHub Actions bağımlılıkları güncel resmi sürümlerin immutable commit SHA'larına sabitlendi.
+- Contabo bootstrap gözlemine göre deploy readiness akışı düzeltildi: CR oluşumu, ECK health geçişleri, pod keşfi ve pod Ready kontrolleri birbirinden ayrıldı.
+- Elasticsearch `unknown` ve Kibana `red` başlangıç durumları retry edilir; timeout/hata halinde otomatik diagnostics eklenir.
+- Readiness state geçişleri ve diagnostics komutları için mock tabanlı regression testi eklendi.
 - Gerçek Contabo sonuçları kullanıcı testinden sonra `artifacts/` ve test raporlarına eklenecektir.

@@ -19,6 +19,8 @@ grep -q 'kind: Elasticsearch' "${RENDERED}"
 grep -q 'kind: Kibana' "${RENDERED}"
 grep -q 'ghcr.io/prometheus-community/elasticsearch-exporter:v1.11.0' "${RENDERED}"
 
+"${ROOT_DIR}/tests/static/deploy-readiness-test.sh"
+
 if command -v kubeconform >/dev/null 2>&1; then
   kubeconform -strict -summary -ignore-missing-schemas "${RENDERED}"
 elif command -v docker >/dev/null 2>&1 && docker info >/dev/null 2>&1; then
