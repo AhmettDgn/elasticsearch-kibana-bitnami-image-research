@@ -5,6 +5,7 @@ ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 TEST_DIR="$(mktemp -d)"
 MOCK_BIN="${TEST_DIR}/bin"
 OUTPUT_DIR="${TEST_DIR}/evidence"
+SUCCESS_OUTPUT_DIR="${TEST_DIR}/evidence-success"
 mkdir -p "${MOCK_BIN}"
 trap 'rm -rf "${TEST_DIR}"' EXIT
 
@@ -61,15 +62,25 @@ fi
 [[ "${all_args}" != *"--insecure"* ]] || { printf 'TLS verification bypassed\n' >&2; exit 60; }
 
 case "${url}" in
+  */demo-index)
+    [[ "${all_args}" == *"--head"* ]] || { printf 'index preflight must use HEAD\n' >&2; exit 2; }
+    if [[ "${MOCK_INDEX_EXISTS:-false}" == "true" ]]; then
+      printf '200'
+    else
+      printf '404'
+    fi
+    ;;
   */_cluster/health\?pretty)
     printf '{"status":"green"}\n' > "${output_file}"
     printf '200'
     ;;
-  */bitnami-free-demo/_search\?pretty\&q=_id:1)
-    printf '{"error":"index_not_found_exception"}\n' > "${output_file}"
-    printf '404'
-    printf 'curl: (22) The requested URL returned error: 404\n' >&2
-    exit 22
+  */demo-index/_search\?pretty\&q=_id:1)
+    if [[ "${MOCK_INDEX_EXISTS:-false}" != "true" ]]; then
+      printf 'search endpoint must not be called when the index preflight returns 404\n' >&2
+      exit 99
+    fi
+    printf '{"hits":{"total":{"value":1},"hits":[{"_id":"1"}]}}\n' > "${output_file}"
+    printf '200'
     ;;
   */api/status)
     printf '{"status":{"overall":{"level":"available"}}}\n' > "${output_file}"
@@ -100,8 +111,7 @@ script_exit=$?
 set -e
 
 [[ "${script_exit}" -ne 0 ]]
-grep -q 'Elasticsearch document search endpoint failed: https://elastic-stack-es-http.elastic-stack.svc:19200/bitnami-free-demo/_search' <<<"${script_output}"
-grep -q 'HTTP 404' <<<"${script_output}"
+grep -q 'Evidence index demo-index does not exist' <<<"${script_output}"
 grep -q 'Partial evidence written' <<<"${script_output}"
 
 grep -q '"status":"green"' "${OUTPUT_DIR}/cluster-health.json"
@@ -109,7 +119,7 @@ grep -q '"level":"available"' "${OUTPUT_DIR}/kibana-status.json"
 grep -q '^elasticsearch_up 1' "${OUTPUT_DIR}/exporter-metrics.txt"
 grep -q 'HTTP status: 404' "${OUTPUT_DIR}/search-result.json.error.txt"
 grep -q 'Elasticsearch cluster health endpoint: success' "${OUTPUT_DIR}/report.md"
-grep -q 'Elasticsearch document search endpoint: failed' "${OUTPUT_DIR}/report.md"
+grep -q 'Elasticsearch document search endpoint: skipped — /demo-index/_search (index does not exist)' "${OUTPUT_DIR}/report.md"
 grep -q 'Kibana status endpoint: success' "${OUTPUT_DIR}/report.md"
 grep -q 'Exporter metrics endpoint: success' "${OUTPUT_DIR}/report.md"
 
@@ -117,5 +127,17 @@ if grep -R -q 'mock-elastic-password' "${OUTPUT_DIR}"; then
   echo 'Credential content leaked into evidence files' >&2
   exit 1
 fi
+
+success_output="$(
+  PATH="${MOCK_BIN}:/usr/bin:/bin" \
+  MOCK_INDEX_EXISTS=true \
+  EVIDENCE_OUTPUT_DIR="${SUCCESS_OUTPUT_DIR}" \
+  EVIDENCE_DATE="test-success" \
+  "${ROOT_DIR}/scripts/collect-evidence.sh" 2>&1
+)"
+
+grep -q 'Wrote sanitized evidence' <<<"${success_output}"
+grep -q '"value":1' "${SUCCESS_OUTPUT_DIR}/search-result.json"
+grep -q 'Elasticsearch document search endpoint: success — /demo-index/_search (HTTP 200)' "${SUCCESS_OUTPUT_DIR}/report.md"
 
 echo 'Collect-evidence partial-output regression test passed'

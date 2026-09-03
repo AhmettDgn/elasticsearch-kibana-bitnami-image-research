@@ -3,7 +3,7 @@ set -Eeuo pipefail
 
 NAMESPACE="${NAMESPACE:-elastic-stack}"
 STACK_NAME="${STACK_NAME:-elastic-stack}"
-INDEX_NAME="${INDEX_NAME:-bitnami-free-demo}"
+INDEX_NAME="${INDEX_NAME:-demo-index}"
 ES_PORT="${ES_PORT:-19200}"
 KB_PORT="${KB_PORT:-15601}"
 EXPORTER_PORT="${EXPORTER_PORT:-19114}"
