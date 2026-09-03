@@ -25,6 +25,7 @@ Kontroller:
 - ServiceMonitor capability testi: CRD capability yokken 0, capability verildiğinde 1 kaynak.
 - Bütün Bash scriptleri `bash -n` syntax kontrolünü geçti.
 - Deploy readiness regression testi; Elasticsearch `ApplyingChanges/unknown → green`, Kibana `red → green`, pod selector keşfi ve timeout diagnostics senaryolarını geçti.
+- Metrics TLS/SAN regression testi; ECK public CA kullanımı, servis DNS hostname'i, configurable local port, `--resolve`, proxy bypass, retry hatası ve timeout diagnostics senaryolarını geçti.
 - Kubeconform CI sonucu: 4 kaynak; standart Kubernetes kaynaklarında 2 valid, ECK CR'larında 2 schema olmadığı için skipped, 0 invalid ve 0 error.
 - Gitleaks CI sonucu: secret leak bulunmadı.
 - GitHub Actions `Validate` workflow sonucu: başarılı.

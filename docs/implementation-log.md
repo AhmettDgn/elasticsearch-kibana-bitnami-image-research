@@ -23,4 +23,7 @@
 - Readiness state geçişleri ve diagnostics komutları için mock tabanlı regression testi eklendi.
 - Gerçek Contabo deployment'ında Elasticsearch `green`, 1 node, `8.19.21`, `Ready`; Kibana `green`, 1 node ve pod `1/1 Running` olarak doğrulandı.
 - Başarılı sonuç nedeniyle Helm/ECK resource creation davranışı korunarak değişiklik yalnız readiness/wait ve hata diagnostics katmanıyla sınırlandı.
+- ECK HTTP sertifikası SAN uyuşmazlığı giderildi: port-forward kullanan scriptler HTTPS hostname olarak servis DNS adını ve `--resolve` kullanıyor; CA doğrulaması açık kalıyor.
+- Metrics kullanıcı scriptine port-forward process kontrolü, görünür curl retry hatası ve cleanup öncesi timeout log dökümü eklendi.
+- TLS/SAN, retry ve timeout davranışı için mock tabanlı regression testi eklendi.
 - Paylaşılan özet sonuçlar test raporuna işlendi; sanitize edilmiş ham komut çıktıları ve screenshot'lar daha sonra `artifacts/` ile `screenshots/` dizinlerine eklenebilir.

@@ -10,6 +10,8 @@ OUTPUT_DIR="${ROOT_DIR}/artifacts/${DATE_DIR}"
 ES_PORT="${ES_PORT:-19200}"
 KB_PORT="${KB_PORT:-15601}"
 EXPORTER_PORT="${EXPORTER_PORT:-19114}"
+ES_SERVICE_DNS="${ES_SERVICE_DNS:-${STACK_NAME}-es-http.${NAMESPACE}.svc}"
+KB_SERVICE_DNS="${KB_SERVICE_DNS:-${STACK_NAME}-kb-http.${NAMESPACE}.svc}"
 
 mkdir -p "${OUTPUT_DIR}"
 tmp_dir="$(mktemp -d)"
@@ -34,11 +36,16 @@ kubectl -n "${NAMESPACE}" port-forward "service/${STACK_NAME}-kb-http" "${KB_POR
 kubectl -n "${NAMESPACE}" port-forward "service/${STACK_NAME}-exporter" "${EXPORTER_PORT}:9114" --address 127.0.0.1 >"${tmp_dir}/exporter-pf.log" 2>&1 & pids+=("$!")
 sleep 3
 
-curl --silent --show-error --fail --cacert "${tmp_dir}/es-ca.crt" -u "elastic:${elastic_password}" "https://127.0.0.1:${ES_PORT}/_cluster/health?pretty" > "${OUTPUT_DIR}/cluster-health.json"
-curl --silent --show-error --fail --cacert "${tmp_dir}/es-ca.crt" -u "elastic:${elastic_password}" "https://127.0.0.1:${ES_PORT}/${INDEX_NAME}/_search?pretty&q=_id:1" > "${OUTPUT_DIR}/search-result.json"
-curl --silent --show-error --fail --cacert "${tmp_dir}/kb-ca.crt" -u "elastic:${elastic_password}" "https://127.0.0.1:${KB_PORT}/api/status" > "${OUTPUT_DIR}/kibana-status.json"
+es_base_url="https://${ES_SERVICE_DNS}:${ES_PORT}"
+kb_base_url="https://${KB_SERVICE_DNS}:${KB_PORT}"
+es_curl_args=(--silent --show-error --fail --cacert "${tmp_dir}/es-ca.crt" --resolve "${ES_SERVICE_DNS}:${ES_PORT}:127.0.0.1" --noproxy "${ES_SERVICE_DNS}" --user "elastic:${elastic_password}")
+kb_curl_args=(--silent --show-error --fail --cacert "${tmp_dir}/kb-ca.crt" --resolve "${KB_SERVICE_DNS}:${KB_PORT}:127.0.0.1" --noproxy "${KB_SERVICE_DNS}" --user "elastic:${elastic_password}")
+
+curl "${es_curl_args[@]}" "${es_base_url}/_cluster/health?pretty" > "${OUTPUT_DIR}/cluster-health.json"
+curl "${es_curl_args[@]}" "${es_base_url}/${INDEX_NAME}/_search?pretty&q=_id:1" > "${OUTPUT_DIR}/search-result.json"
+curl "${kb_curl_args[@]}" "${kb_base_url}/api/status" > "${OUTPUT_DIR}/kibana-status.json"
 curl --silent --show-error --fail "http://127.0.0.1:${EXPORTER_PORT}/metrics" | grep -E '^(# (HELP|TYPE) elasticsearch_|elasticsearch_)' > "${OUTPUT_DIR}/exporter-metrics.txt"
-unset elastic_password
+unset elastic_password es_curl_args kb_curl_args
 
 cat > "${OUTPUT_DIR}/report.md" <<EOF
 # Deployment Evidence - ${DATE_DIR}
