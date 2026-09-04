@@ -122,3 +122,10 @@ Detaylı sanitize edilmiş sonuç özeti [`tests/integration/contabo-validation-
 - Açık Kubernetes iç ağ IP'leri içeren service görüntüsü de public repository kapsamından çıkarıldı; servis tipi kanıtı sanitize edilmiş rapor ve server-local `services.txt` içinde korundu.
 - 10 benzersiz ve paylaşılabilir görüntü açıklayıcı adlarla `screenshots/` altına taşındı ve her birinin kanıtladığı durum `screenshots/README.md` içinde belgelendi.
 - Windows üzerinden Kibana UI ekranı alınamadı; bunun yerine Kibana CR `green`, pod `1/1 Running` ve TLS doğrulamalı `/api/status=available` sonuçları kanıt olarak kullanıldı.
+
+### Kazanç raporu
+
+- Bitnami'den ECK'ye geçişin mimari, güvenlik, operasyon, sürüm yönetimi, troubleshooting ve büyüme etkileri ayrı bir kazanç raporunda toplandı.
+- Kazançlar yalnız nitel ifadelerle bırakılmadı; aktif Bitnami bağımlılığı sayısı, legacy override path eşleşmeleri, tek sürüm kaynağı, green health, idempotency ve persistence gibi proje kanıtlarıyla ilişkilendirildi.
+- Finansal ölçüm yapılmadığı için doğrulanmamış maliyet yüzdeleri kullanılmadı.
+- Operator/CRD yönetimi, öğrenme eğrisi, lisans sınırları ve tek node riski geçişin maliyetleri olarak açıkça kaydedildi.

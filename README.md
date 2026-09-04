@@ -126,6 +126,7 @@ Kibana: `https://localhost:5601`
 |---|---|
 | [Contabo runbook](docs/contabo-runbook.md) | Sunucu hazırlığı, deployment, güvenli erişim ve test komutları |
 | [Mimari](docs/architecture.md) | ECK, workload, servis ve storage ilişkileri |
+| [Kazanç raporu](docs/kazanc-raporu.md) | Bitnami'den ECK'ye geçişin ölçülebilir teknik ve operasyonel kazanımları ile maliyetleri |
 | [Implementation log](docs/implementation-log.md) | Kronolojik hata, kök neden, çözüm ve doğrulama kaydı |
 | [Contabo validasyon raporu](tests/integration/contabo-validation-2026-09-04.md) | Gerçek ortam fonksiyonel kabul sonuçları |
 | [Screenshot kanıt raporu](screenshots/README.md) | Her görüntünün kanıtladığı teknik durum |
