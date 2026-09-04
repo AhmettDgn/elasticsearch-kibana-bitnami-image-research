@@ -1,6 +1,8 @@
 # Bitnami'siz ECK Tabanlı Elasticsearch & Kibana
 
-Bu repository, eski Bitnami Elasticsearch Helm chart'ındaki image, path, entrypoint ve helper bağımlılıklarını inceler ve çalışan sistemi resmi Elastic image'larını yöneten ECK tabanlı bir chart ile değiştirir.
+[![Validate](https://github.com/AhmettDgn/elasticsearch-kibana-bitnami-image-research/actions/workflows/validate.yaml/badge.svg)](https://github.com/AhmettDgn/elasticsearch-kibana-bitnami-image-research/actions/workflows/validate.yaml)
+
+Bu repository, eski Bitnami Elasticsearch Helm chart'ındaki image, path, entrypoint ve helper bağımlılıklarını analiz eder; aktif sistemi ECK, resmi Elastic image'ları ve Kubernetes-native güvenlik/persistence bileşenleriyle değiştirir. Çözüm gerçek bir Contabo K3s ortamında uçtan uca doğrulanmıştır.
 
 ## Sonuç
 
@@ -44,6 +46,27 @@ Bootstrap scriptinin varsayılan K3s sürümü `v1.36.3+k3s1` olarak sabittir ve
 | Bitnami bağımlılığı | Aktif render ve runtime'da image/helper/chart/path bağımlılığı yok |
 
 Ayrıntılı hata analizi ve test kanıt özeti: [Contabo validasyon raporu](tests/integration/contabo-validation-2026-09-04.md). Kronolojik uygulama kaydı: [implementation log](docs/implementation-log.md).
+
+## Görsel kanıtlar
+
+<details>
+<summary>Seçilmiş doğrulama ekran görüntülerini göster</summary>
+
+### ECK workload ve resource health
+
+![Elasticsearch, Kibana ve exporter podları Running](screenshots/01-stack-pods-running.png)
+
+![Elasticsearch ve Kibana ECK resource health](screenshots/02-eck-resources-green.png)
+
+### Elasticsearch cluster ve persistence
+
+![Elasticsearch cluster health green](screenshots/04-elasticsearch-cluster-health-green.png)
+
+![Pod recreation sonrası persistence testi](screenshots/09-persistence-after-recreation.png)
+
+</details>
+
+On sanitize edilmiş görüntünün açıklamalı kanıt matrisi için [ekran görüntüsü raporuna](screenshots/README.md) bakın. Windows üzerinden Kibana UI görüntüsü alınamadığından arayüz yerine ECK health ve TLS doğrulamalı `/api/status=available` kanıtı kullanılmıştır.
 
 ## Hızlı başlangıç
 
@@ -96,6 +119,17 @@ Kibana: `https://localhost:5601`
 - `scripts`: K3s, deployment, doğrulama ve kanıt toplama otomasyonu.
 - `tests`: Static, integration ve resilience testleri.
 - `docs`: Mimari, runbook, çalışma günlüğü ve production önerileri.
+
+## Dokümantasyon
+
+| Doküman | İçerik |
+|---|---|
+| [Contabo runbook](docs/contabo-runbook.md) | Sunucu hazırlığı, deployment, güvenli erişim ve test komutları |
+| [Mimari](docs/architecture.md) | ECK, workload, servis ve storage ilişkileri |
+| [Implementation log](docs/implementation-log.md) | Kronolojik hata, kök neden, çözüm ve doğrulama kaydı |
+| [Contabo validasyon raporu](tests/integration/contabo-validation-2026-09-04.md) | Gerçek ortam fonksiyonel kabul sonuçları |
+| [Screenshot kanıt raporu](screenshots/README.md) | Her görüntünün kanıtladığı teknik durum |
+| [Production değerlendirmeleri](docs/production-considerations.md) | HA, backup, snapshot, monitoring ve upgrade önerileri |
 
 ## Önemli sınırlar
 

@@ -114,3 +114,11 @@ Doğrulama Ubuntu 24.04.4 LTS, amd64/x86_64, 4 vCPU, 7.8 GiB RAM, swap kapalı t
 - Static/regression: Helm lint 0 hata; deploy readiness, TLS/SAN, partial evidence, verify metrics ve resilience recreation testleri geçti; kubeconform 2 valid, 0 invalid, 0 error, 2 ECK CR schema skip sonucu verdi.
 
 Detaylı sanitize edilmiş sonuç özeti [`tests/integration/contabo-validation-2026-09-04.md`](../tests/integration/contabo-validation-2026-09-04.md) dosyasındadır. Raw evidence sunucuda üretilmiş ve repository'nin varsayılan güvenlik politikası gereği Git'e otomatik eklenmemiştir.
+
+### Görsel kanıt düzenlemesi
+
+- 14 kaynak görüntü incelendi; birebir aynı exporter metrics görüntüsü ve daha az okunaklı Kibana status tekrarı elendi.
+- Açık sunucu IP adresi içeren node/StorageClass görüntüsü public repository'ye alınmadı; ortam bilgileri sanitize edilmiş metin raporunda korundu.
+- Açık Kubernetes iç ağ IP'leri içeren service görüntüsü de public repository kapsamından çıkarıldı; servis tipi kanıtı sanitize edilmiş rapor ve server-local `services.txt` içinde korundu.
+- 10 benzersiz ve paylaşılabilir görüntü açıklayıcı adlarla `screenshots/` altına taşındı ve her birinin kanıtladığı durum `screenshots/README.md` içinde belgelendi.
+- Windows üzerinden Kibana UI ekranı alınamadı; bunun yerine Kibana CR `green`, pod `1/1 Running` ve TLS doğrulamalı `/api/status=available` sonuçları kanıt olarak kullanıldı.

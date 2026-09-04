@@ -71,6 +71,12 @@ Exporter üzerinde doğrulanan metrik aileleri arasında şunlar bulunur:
 
 Raw evidence dizini repository politikasına göre Git tarafından ignore edilir. Dosyalar yalnız password/token/Secret/private IP kontrolünden sonra bilinçli olarak paylaşılmalıdır.
 
+## Görsel kanıtlar
+
+Repository'ye eklenen 10 sanitize edilmiş terminal görüntüsü; pod health, ECK resource status, PVC, cluster health, exporter metrics, index, search, Kibana status, persistence ve static test sonuçlarını kapsar. Her görüntünün teknik açıklaması [`screenshots/README.md`](../../screenshots/README.md) dosyasındadır. Açık public veya Kubernetes iç ağ IP'si içeren kaynak görüntüler paylaşılmamış; servis tipi kanıtı server-local `services.txt` ve sanitize edilmiş rapor sonucunda korunmuştur.
+
+Kibana UI görüntüsü Windows tarafındaki erişim/sertifika kısıtı nedeniyle alınamadı. Bu eksiklik fonksiyonel başarısızlık olarak değerlendirilmedi; Kibana CR health `green`, pod `1/1 Running` ve TLS doğrulamalı `/api/status` sonucu `overall.level=available` ile servis kullanılabilirliği kanıtlandı.
+
 ## Kabul kararı
 
 Aktif Helm render'ında ve çalışan ECK deployment'ında Bitnami image, Bitnami Common/Kibana sub-chart, helper image, `/opt/bitnami` veya `/bitnami` runtime path bağımlılığı bulunmamaktadır. ECK Operator, resmi Elastic image'ları ve Kubernetes-native Secret/securityContext/persistence yaklaşımı gerçek ortamda başarıyla doğrulanmıştır.
