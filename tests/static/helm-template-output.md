@@ -14,7 +14,7 @@ Kontroller:
 - Aktif render'da `docker.io/bitnami`, `/opt/bitnami` ve `/bitnami/` bulunmaması.
 - Varsa kubeconform şema kontrolü.
 
-## Yerel sonuç — 2026-09-03
+## Son doğrulama — 2026-09-04
 
 - Helm: `v3.18.6`
 - `helm lint`: başarılı, 1 chart lint edildi ve hata bulunmadı.
@@ -34,3 +34,5 @@ Kontroller:
 - Kubeconform CI sonucu: 4 kaynak; standart Kubernetes kaynaklarında 2 valid, ECK CR'larında 2 schema olmadığı için skipped, 0 invalid ve 0 error.
 - Gitleaks CI sonucu: secret leak bulunmadı.
 - GitHub Actions `Validate` workflow sonucu: başarılı.
+
+Gerçek sunucudaki son toplu çıktı; Helm lint `0 failed`, deploy readiness, Metrics TLS/SAN, collect-evidence partial-output, verify metrics ve resilience recreation regression testlerinin tamamı başarılıdır. Kubeconform sonucu `Valid 2`, `Invalid 0`, `Errors 0`, `Skipped 2` olarak kaydedilmiştir; skip edilen iki kaynak ECK custom resource şemalarıdır.

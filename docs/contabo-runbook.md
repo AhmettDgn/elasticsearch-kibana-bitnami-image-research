@@ -29,7 +29,7 @@ kubectl get storageclass
 kubectl get pods -A
 ```
 
-Beklenen: node `Ready`, `local-path` mevcut ve `vm.max_map_count = 262144`. K3s Traefik kurulmaz. Bootstrap, root kubeconfig'i dünyaya okunabilir yapmak yerine sudo kullanan kullanıcı için `~/.kube/config` altında mode `0600` kopya oluşturur.
+Beklenen: node `Ready`, `local-path` mevcut ve `vm.max_map_count` en az `262144`. Gerçek 2026-09-04 Contabo testinde K3s `v1.36.4+k3s1` ve `vm.max_map_count=1048576` gözlendi. K3s Traefik kurulmaz. Bootstrap, root kubeconfig'i dünyaya okunabilir yapmak yerine sudo kullanan kullanıcı için `~/.kube/config` altında mode `0600` kopya oluşturur.
 
 ## 3. Deployment
 

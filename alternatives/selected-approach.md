@@ -2,7 +2,7 @@
 
 ## Karar
 
-Aktif deployment, ECK `3.5.0` üzerinde Elasticsearch ve Kibana `8.19.21` CR'ları ile kurulacaktır. Metrics için Prometheus Community exporter `1.11.0` ayrı Deployment olarak çalışacaktır.
+Aktif deployment, ECK `3.5.0` üzerinde Elasticsearch ve Kibana `8.19.21` CR'ları ile kurulmuştur. Metrics için Prometheus Community exporter `1.11.0` ayrı Deployment olarak çalışmaktadır.
 
 ## Neden image override değil?
 
@@ -18,3 +18,7 @@ Image override sadece image adresini değiştirir; Bitnami entrypoint, healthche
 - Gelecekte node sayısı, storage ve upgrade stratejisinin declarative yönetilebilmesi.
 
 Bu topoloji yalnız tek VPS lab testidir; production HA iddiası yoktur.
+
+## Gerçek ortam doğrulaması
+
+Yaklaşım 2026-09-04 tarihinde Ubuntu 24.04.4 LTS/amd64, tek node K3s `v1.36.4+k3s1` Contabo ortamında doğrulandı. TLS/authentication, green cluster health, index/document/search, Kibana status, exporter metrics, tekrarlı Helm upgrade ve pod recreation sonrası PVC persistence testleri başarılı oldu. Ayrıntılar [`tests/integration/contabo-validation-2026-09-04.md`](../tests/integration/contabo-validation-2026-09-04.md) dosyasındadır.

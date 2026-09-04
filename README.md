@@ -1,4 +1,4 @@
-# Elasticsearch & Kibana: Bitnami Image Bağımlılığı Araştırması
+# Bitnami'siz ECK Tabanlı Elasticsearch & Kibana
 
 Bu repository, eski Bitnami Elasticsearch Helm chart'ındaki image, path, entrypoint ve helper bağımlılıklarını inceler ve çalışan sistemi resmi Elastic image'larını yöneten ECK tabanlı bir chart ile değiştirir.
 
@@ -9,8 +9,8 @@ Yalnız image override yeterli değildir. Eski chart; Bitnami'ye özel `ELASTICS
 ```text
 Helm chart
   ├── Elasticsearch CR ─┐
-  ├── Kibana CR ────────┼──> ECK 3.5.0 ──> Official Elastic 8.19.21 images
-  └── Exporter ─────────┘
+  ├── Kibana CR ────────┴──> ECK 3.5.0 ──> Official Elastic 8.19.21 images
+  └── Exporter Deployment ──> Elasticsearch /metrics
 ```
 
 Hedef ortam Ubuntu amd64 üzerinde tek K3s node'dur. Bu bir lab/PoC topolojisidir; yüksek erişilebilirlik sağlamaz.
@@ -19,11 +19,31 @@ Hedef ortam Ubuntu amd64 üzerinde tek K3s node'dur. Bu bir lab/PoC topolojisidi
 
 | Bileşen | Sürüm | Amaç |
 |---|---:|---|
-| K3s | `v1.36.3+k3s1` | Tek sunuculu Kubernetes |
+| K3s | `v1.36.4+k3s1` (doğrulanan ortam) | Tek sunuculu Kubernetes |
 | ECK operator | `3.5.0` | Elasticsearch/Kibana yaşam döngüsü |
 | Elasticsearch | `8.19.21` | Tek node arama ve veri servisi |
 | Kibana | `8.19.21` | Görselleştirme arayüzü |
 | elasticsearch_exporter | `1.11.0` | Prometheus metrik endpoint'i |
+
+Bootstrap scriptinin varsayılan K3s sürümü `v1.36.3+k3s1` olarak sabittir ve `K3S_VERSION` ile değiştirilebilir. Gerçek Contabo validasyonu, sunucudaki `v1.36.4+k3s1` sürümü üzerinde tamamlanmıştır.
+
+## Gerçek Contabo doğrulaması
+
+Çözüm 4 vCPU, 7.8 GiB RAM, swap kapalı Ubuntu 24.04.4 LTS amd64 Contabo VPS üzerinde uygulanmıştır. Deployment öncesinde Kafka pod'ları sıfıra ölçeklenmiş ve Jenkins geçici olarak durdurularak kullanılabilir RAM yaklaşık 6.1 GiB seviyesine çıkarılmıştır. Otomasyon mevcut workload'ları kendiliğinden durdurmamıştır.
+
+| Kontrol | Doğrulanan sonuç |
+|---|---|
+| Elasticsearch | `8.19.21`, 1 node, `phase=Ready`, health `green` |
+| Cluster | 0 unassigned shard, `%100` active shard |
+| Index/document/search | `demo-index`, replica 0, document `_id=1`, 1 search hit |
+| Kibana | `8.19.21`, 1 pod, health `green`, `/api/status=available` |
+| Exporter | `1.11.0`, pod `1/1 Running`, `/metrics` üzerinde gerçek Elasticsearch metrikleri |
+| Storage | `20Gi local-path` PVC, `Bound` |
+| Idempotency | Tekrarlı `helm upgrade`/`deploy.sh` başarılı |
+| Persistence | Elasticsearch pod recreation sonrası `demo-index/_doc/1 found=true` |
+| Bitnami bağımlılığı | Aktif render ve runtime'da image/helper/chart/path bağımlılığı yok |
+
+Ayrıntılı hata analizi ve test kanıt özeti: [Contabo validasyon raporu](tests/integration/contabo-validation-2026-09-04.md). Kronolojik uygulama kaydı: [implementation log](docs/implementation-log.md).
 
 ## Hızlı başlangıç
 
@@ -37,6 +57,8 @@ sudo ./scripts/bootstrap-k3s.sh
 ./scripts/verify.sh
 ./scripts/collect-evidence.sh
 ```
+
+Gerçek testte sanitize edilmiş evidence dosyaları sunucuda `artifacts/2026-09-04/` altında oluşturulmuştur. Bu dizin credential sızıntısı riskine karşı varsayılan olarak Git tarafından ignore edilir; dosyalar ancak manuel içerik kontrolünden sonra paylaşılmalıdır.
 
 Static test:
 

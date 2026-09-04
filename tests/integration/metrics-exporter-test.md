@@ -25,3 +25,13 @@ API probe her denemede port-forward process'inin yaşadığını kontrol eder. C
 `verify.sh` Elasticsearch API probe'undaki geçici bağlantı hatasını retry sırasında info mesajı olarak gösterir; curl ayrıntısını yalnız bütün denemeler tükendiğinde stderr'e yazar.
 
 Varsayılan `LOCAL_PORT=19200` değeridir. Script port-forward başlatmadan önce portun dinlemede olup olmadığını kontrol eder; doluysa anlaşılır bir hata ile durur ve örneğin `LOCAL_PORT=19443` seçilmesini önerir.
+
+## Gerçek Contabo sonucu — 2026-09-04
+
+- Exporter pod: `1/1 Running`.
+- Service: yalnız `ClusterIP`, port `9114`.
+- `/healthz`: başarılı.
+- `/metrics`: başarılı ve gerçek Elasticsearch metrikleri mevcut.
+- Doğrulanan örnekler: `elasticsearch_cluster_health_active_primary_shards`, `elasticsearch_cluster_health_active_shards`, `elasticsearch_cluster_health_number_of_data_nodes` ve circuit breaker metrikleri.
+
+Metrics çıktısı sunucuda `artifacts/2026-09-04/exporter-metrics.txt` altında sanitize edilmiş biçimde toplandı; credential veya Authorization header içermez.
